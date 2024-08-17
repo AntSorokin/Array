@@ -5,9 +5,9 @@
 #include <stdint.h>
 
 typedef enum {
-    OK_ERROR,
-    OUT_OF_MEM,
-    OUT_OF_BOUNDS
+    ARRAY_OK_ERROR,
+    ARRAY_OUT_OF_MEM,
+    ARRAY_OUT_OF_BOUNDS
 } array_error;
 
 /** 
@@ -31,7 +31,7 @@ typedef enum {
 *   @param init_capacity Initial and minimum capacity of the resizeable array
 *   @warning init_capacity must be >= 1 
 *   @warning The buf is stored in the heap and needs to be released by array_free
-*   @note Can modify error state to OUT_OF_MEM
+*   @note Can modify error state to ARRAY_OUT_OF_MEM
 *   @example array_init(char, a, 10);
 */ 
 #define array_init(T, array_struct, init_capacity) do { \
@@ -40,10 +40,10 @@ typedef enum {
             array_struct.size = 0; \
             array_struct.min_capacity = init_capacity; \
             array_struct.capacity = init_capacity; \
-            array_struct.error = OK_ERROR; \
+            array_struct.error = ARRAY_OK_ERROR; \
         } \
         else { \
-            array_struct.error = OUT_OF_MEM; \
+            array_struct.error = ARRAY_OUT_OF_MEM; \
         } \
     } while(0)
 
@@ -52,17 +52,17 @@ typedef enum {
 *   @param T Type stored in array struct
 *   @param array_struct Array struct to add to
 *   @param val Value to store
-*   @note Will not execute if error state is not OK_ERROR
-*   @note Can modify error state to OUT_OF_MEM
+*   @note Will not execute if error state is not ARRAY_OK_ERROR
+*   @note Can modify error state to ARRAY_OUT_OF_MEM
 *   @example array_add(char, a, 'a');
 */
 #define array_add(T, array_struct, val) do { \
-        if(array_struct.error == OK_ERROR) { \
+        if(array_struct.error == ARRAY_OK_ERROR) { \
             if(array_struct.size == array_struct.capacity) { \
                 array_struct.capacity *= 2; \
                 T* temp = realloc(array_struct.buf, sizeof(T) * array_struct.capacity); \
                 if(!temp) { \
-                    array_struct.error = OUT_OF_MEM; \
+                    array_struct.error = ARRAY_OUT_OF_MEM; \
                     break; \
                 } \
                 array_struct.buf = temp; \
@@ -77,17 +77,17 @@ typedef enum {
 *   @param array_struct Array struct to add to
 *   @param index Index to store value at
 *   @param val Value to store
-*   @note Will not execute if error state is not OK_ERROR
-*   @note Can modify error state to OUT_OF_MEM or OUT_OF_BOUNDS
+*   @note Will not execute if error state is not ARRAY_OK_ERROR
+*   @note Can modify error state to ARRAY_OUT_OF_MEM or ARRAY_OUT_OF_BOUNDS
 *   @example array_add(char, a, 1, 'b');
 */
 #define array_add_index(T, array_struct, index, val) do { \
-        if(array_struct.error == OK_ERROR) { \
+        if(array_struct.error == ARRAY_OK_ERROR) { \
             if(array_struct.size == array_struct.capacity) { \
                 array_struct.capacity *= 2; \
                 T* temp = realloc(array_struct.buf, sizeof(T) * array_struct.capacity); \
                 if(!temp) { \
-                    array_struct.error = OUT_OF_MEM; \
+                    array_struct.error = ARRAY_OUT_OF_MEM; \
                     break; \
                 } \
                 array_struct.buf = temp; \
@@ -100,7 +100,7 @@ typedef enum {
                 array_struct.buf[index] = val; \
             } \
             else { \
-                array_struct.error = OUT_OF_BOUNDS; \
+                array_struct.error = ARRAY_OUT_OF_BOUNDS; \
             } \
         } \
     } while(0)
@@ -110,17 +110,17 @@ typedef enum {
 * @param array_struct Array struct to modify
 * @param index Index value to overwrite
 * @param val Value to write at index
-* @note Will not execute if error state is not OK_ERROR
-* @note Can modify error state to OUT_OF_BOUNDS
+* @note Will not execute if error state is not ARRAY_OK_ERROR
+* @note Can modify error state to ARRAY_OUT_OF_BOUNDS
 * @example array_set(a, 1, 'c');
 */
 #define array_set(array_struct, index, val) do { \
-        if(array_struct.error == OK_ERROR) { \
+        if(array_struct.error == ARRAY_OK_ERROR) { \
             if(0 <= index && index < array_struct.size) { \
                 array_struct.buf[index] = val; \
             } \
             else { \
-                array_struct.error = OUT_OF_BOUNDS; \
+                array_struct.error = ARRAY_OUT_OF_BOUNDS; \
             } \
         } \
     } while(0) 
@@ -131,20 +131,20 @@ typedef enum {
  * @param array_struct Array struct to get from
  * @param index Index value to get
  * @param ret_val Where value at index is to be stored
- * @note Will not execute if error state is not OK_ERROR
- * @note Can modify error state to OUT_OF_BOUNDS
+ * @note Will not execute if error state is not ARRAY_OK_ERROR
+ * @note Can modify error state to ARRAY_OUT_OF_BOUNDS
  * @example 
  * //Value will be store in temp
  * char temp;
  * array_get(a, 0, temp);
  */
 #define array_get(array_struct, index, ret_val) do { \
-        if(array_struct.error == OK_ERROR) { \
+        if(array_struct.error == ARRAY_OK_ERROR) { \
             if(0 <= index && index < array_struct.size) { \
                 ret_val = array_struct.buf[index]; \
             } \
             else { \
-                array_struct.error = OUT_OF_BOUNDS; \
+                array_struct.error = ARRAY_OUT_OF_BOUNDS; \
             } \
         } \
     } while(0)
@@ -153,25 +153,25 @@ typedef enum {
 *   Removes value at tail
 *   @param T Type stored in array struct
 *   @param array_struct Array struct to be removed from
-*   @note Will not execute if error state is not OK_ERROR
-*   @note Can modify error state to OUT_OF_MEM or OUT_OF_BOUNDS
+*   @note Will not execute if error state is not ARRAY_OK_ERROR
+*   @note Can modify error state to ARRAY_OUT_OF_MEM or ARRAY_OUT_OF_BOUNDS
 *   @example array_remove(char, a);
 */
 #define array_remove(T, array_struct) do { \
-        if(array_struct.error == OK_ERROR) { \
+        if(array_struct.error == ARRAY_OK_ERROR) { \
             if(array_struct.size > 0) { \
                 if(--(array_struct.size) == array_struct.capacity / 2 && array_struct.capacity != array_struct.min_capacity) { \
                     array_struct.capacity /= 2; \
                     T* temp = realloc(array_struct.buf, sizeof(T) * array_struct.capacity); \
                     if(!temp) { \
-                        array_struct.error = OUT_OF_MEM; \
+                        array_struct.error = ARRAY_OUT_OF_MEM; \
                         break; \
                     } \
                     array_struct.buf = temp; \
                 } \
             } \
             else { \
-                array_struct.error = OUT_OF_BOUNDS; \
+                array_struct.error = ARRAY_OUT_OF_BOUNDS; \
             } \
         } \
     } while(0)
@@ -181,12 +181,12 @@ typedef enum {
 *   @param T Type stored in array struct
 *   @param array_struct Array struct to be removed from
 *   @param index Index to remove value at
-*   @note Will not execute if error state is not OK_ERROR
-*   @note Can modify error state to OUT_OF_MEM or OUT_OF_BOUNDS
+*   @note Will not execute if error state is not ARRAY_OK_ERROR
+*   @note Can modify error state to ARRAY_OUT_OF_MEM or ARRAY_OUT_OF_BOUNDS
 *   @example array_remove_index(char, a, 0);
 */
 #define array_remove_index(T, array_struct, index) do { \
-        if(array_struct.error == OK_ERROR) { \
+        if(array_struct.error == ARRAY_OK_ERROR) { \
             if(array_struct.size > 0 && 0 <= index && index < array_struct.size) { \
                 for(uint64_t i = index; i < array_struct.size - 1; ++i) { \
                     array_struct.buf[i] = array_struct.buf[i + 1]; \
@@ -195,14 +195,14 @@ typedef enum {
                     array_struct.capacity /= 2; \
                     T* temp = realloc(array_struct.buf, sizeof(T) * array_struct.capacity); \
                     if(!temp) { \
-                        array_struct.error = OUT_OF_MEM; \
+                        array_struct.error = ARRAY_OUT_OF_MEM; \
                         break; \
                     } \
                     array_struct.buf = temp; \
                 } \
             } \
             else { \
-                array_struct.error = OUT_OF_BOUNDS; \
+                array_struct.error = ARRAY_OUT_OF_BOUNDS; \
             } \
         } \
     } while(0)
